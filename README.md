@@ -89,6 +89,10 @@ build.sh
 .github/workflows/{ci,release}.yml
 ```
 
+## Website
+
+The one-page site in `docs/` is published with GitHub Pages (Settings → Pages → Deploy from a branch → `main`, folder `/docs`). The download button reads the latest release from the GitHub API, so it updates itself when you tag a new version.
+
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
