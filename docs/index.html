@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wakey Wakey — keeps your Mac awake</title>
+<meta name="description" content="Wakey Wakey is a free, open-source Mac menu bar app that stops your Mac going to sleep. Click to keep it awake, click again to let it rest.">
+<meta property="og:title" content="Wakey Wakey for macOS">
+<meta property="og:description" content="Keeps your Mac awake. Free and open source.">
+<meta property="og:image" content="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400;9..144,600;9..144,800,100&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #121B3A;
+    --night-deep: #0B1129;
+    --cloud: #E9ECF7;
+    --cloud-soft: #A9B2D6;
+    --lamp: #FFD86B;
+    --lamp-deep: #D9A818;
+    --iris: #466EE6;
+    --max: 880px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background-color: var(--night-deep);
+    background-image: radial-gradient(1200px 700px at 50% -10%, #1C2A5C 0%, var(--night) 55%, var(--night-deep) 100%);
+    background-repeat: no-repeat;
+    color: var(--cloud);
+    font-family: "Nunito", system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .brand { font-family: "Fraunces", Georgia, serif; font-variation-settings: "SOFT" 100; }
+  a { color: var(--lamp); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 3px; }
+
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+
+  header { padding: 28px 0 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 600; text-decoration: none; color: var(--cloud); font-size: 22px; }
+  .brand img { width: 36px; height: 36px; border-radius: 9px; }
+  header nav a { color: var(--cloud-soft); text-decoration: none; margin-left: 20px; font-weight: 700; }
+  header nav a:hover { color: var(--cloud); }
+
+  /* Hero: the eye */
+  .hero { padding: 56px 0 40px; text-align: center; }
+  .eye-btn {
+    background: none; border: 0; padding: 0; cursor: pointer; display: block; margin: 0 auto 8px;
+    border-radius: 50%;
+  }
+  .eye { width: min(260px, 60vw); height: auto; display: block; }
+  .eye .lid { transform-box: view-box; transition: transform .35s cubic-bezier(.4,0,.2,1); }
+  .eye .lid-top { transform: scaleY(0); }
+  .eye .lid-bottom { transform: scaleY(0); }
+  .eye .glow { opacity: 0; transition: opacity .6s; }
+  /* drowsy: slow blink loop */
+  .drowsy .lid-top { animation: blinkTop 4s ease-in-out infinite; }
+  .drowsy .lid-bottom { animation: blinkBottom 4s ease-in-out infinite; }
+  @keyframes blinkTop { 0%, 78%, 100% { transform: scaleY(0); } 85%, 93% { transform: scaleY(1); } }
+  @keyframes blinkBottom { 0%, 78%, 100% { transform: scaleY(0); } 85%, 93% { transform: scaleY(1); } }
+  .awake .glow { opacity: 1; }
+  .awake .lid-top, .awake .lid-bottom { animation: none; transform: scaleY(0); }
+  .eye-state { font-weight: 700; color: var(--cloud-soft); margin: 0 0 36px; font-size: 16px; }
+  .eye-state b { color: var(--lamp); font-weight: 700; }
+
+  .hero h1 { font-size: clamp(34px, 6vw, 56px); font-weight: 600; line-height: 1.08; margin: 0 auto 16px; max-width: 16ch; letter-spacing: -0.015em; }
+  .hero p { color: var(--cloud-soft); max-width: 46ch; margin: 0 auto 32px; }
+
+  .download {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--lamp); color: var(--night-deep); text-decoration: none;
+    font-weight: 800; font-size: 19px;
+    padding: 16px 28px; border-radius: 999px;
+    box-shadow: 0 0 0 0 rgba(255,216,107,.0), 0 10px 30px rgba(255,216,107,.18);
+    transition: box-shadow .25s, transform .1s;
+  }
+  .download:hover { box-shadow: 0 0 0 6px rgba(255,216,107,.18), 0 10px 30px rgba(255,216,107,.3); }
+  .download:active { transform: scale(.98); }
+  .meta { margin-top: 14px; font-size: 15px; color: var(--cloud-soft); }
+
+  /* Features: a short list, not cards */
+  .features { padding: 72px 0 24px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px 48px; }
+  .features h3 { font-size: 24px; font-weight: 600; margin: 0 0 6px; }
+  .features p { margin: 0; color: var(--cloud-soft); }
+
+  .how { padding: 48px 0; }
+  .how h2 { font-size: 32px; font-weight: 600; margin: 0 0 12px; }
+  .how p { max-width: 62ch; color: var(--cloud-soft); }
+  .how ul { padding-left: 22px; color: var(--cloud-soft); max-width: 62ch; }
+  .how li { margin-bottom: 8px; }
+  .how li b { color: var(--cloud); }
+
+  footer { padding: 48px 0 56px; color: var(--cloud-soft); font-size: 15px; display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; }
+  footer a { color: inherit; }
+
+  @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) {
+    .drowsy .lid-top, .drowsy .lid-bottom { animation: none; transform: scaleY(.55); }
+    .eye .lid, .eye .glow, .download { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="#"><img src="icon.png" alt="">Wakey Wakey</a>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="https://github.com/amcode/WakeyWakey">GitHub</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <button class="eye-btn" id="eyeBtn" aria-pressed="false" aria-label="Toggle keep awake (demo)">
+      <svg class="eye drowsy" id="eye" viewBox="0 0 260 180" aria-hidden="true">
+        <defs>
+          <clipPath id="eyeClip"><path d="M10 90 C 60 20, 200 20, 250 90 C 200 160, 60 160, 10 90 Z"/></clipPath>
+          <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#FFD86B" stop-opacity=".55"/><stop offset="1" stop-color="#FFD86B" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle class="glow" cx="130" cy="90" r="120" fill="url(#glowGrad)"/>
+        <path d="M10 90 C 60 20, 200 20, 250 90 C 200 160, 60 160, 10 90 Z" fill="#F4F6FF"/>
+        <g clip-path="url(#eyeClip)">
+          <circle cx="130" cy="90" r="46" fill="#466EE6"/>
+          <circle cx="130" cy="90" r="22" fill="#0B1129"/>
+          <circle cx="146" cy="74" r="8" fill="#fff"/>
+          <rect class="lid lid-top" x="0" y="0" width="260" height="90" fill="#121B3A" style="transform-origin:130px 0"/>
+          <rect class="lid lid-bottom" x="0" y="90" width="260" height="90" fill="#121B3A" style="transform-origin:130px 180px"/>
+        </g>
+        <path d="M10 90 C 60 20, 200 20, 250 90 C 200 160, 60 160, 10 90 Z" fill="none" stroke="#E9ECF7" stroke-width="5" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <p class="eye-state" id="eyeState">Getting sleepy. <b>Click the eye.</b></p>
+
+    <h1>Your Mac, kept awake for as long as you need.</h1>
+    <p>A small, free menu bar app. One click stops your Mac sleeping, dimming or locking — handy for downloads, presentations, long builds and anything else you don't want interrupted. Click again to let it rest.</p>
+    <a class="download" id="download" href="https://github.com/amcode/WakeyWakey/releases/latest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+      Download for Mac
+    </a>
+    <div class="meta" id="meta">macOS 13 or later · free and open source</div>
+  </section>
+
+  <section class="features">
+    <div>
+      <h3>One click</h3>
+      <p>Left-click the eye in your menu bar to keep your Mac awake. Left-click again to turn it off.</p>
+    </div>
+    <div>
+      <h3>Or set a timer</h3>
+      <p>Right-click for 5 minutes, half an hour, 5 hours, or indefinitely. The menu shows how long is left.</p>
+    </div>
+    <div>
+      <h3>Display, or just the Mac</h3>
+      <p>Keep the screen lit, or let it dim and lock while the Mac itself stays awake for background work.</p>
+    </div>
+    <div>
+      <h3>Out of the way</h3>
+      <p>No Dock icon, no window. Launch at login, activate at launch, and forget it's there.</p>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <h2>How it works</h2>
+    <p>Wakey Wakey uses the same power-management request that macOS apps use when playing a video or running a long task, so it's safe, needs no special permissions, and is always released when you turn it off or quit. The code is open for you to check.</p>
+    <ul>
+      <li><b>Install.</b> Open the download, drag Wakey Wakey to Applications, open it.</li>
+      <li><b>Look for the eye</b> in your menu bar. Closed means your Mac can sleep as normal; open means it's being kept awake.</li>
+      <li><b>Right-click</b> for timers and preferences.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Free, open source, MIT licensed.</span>
+    <span><a href="https://github.com/amcode/WakeyWakey">Source code</a> · <a href="https://github.com/amcode/WakeyWakey/releases">All releases</a> · <a href="https://github.com/amcode/WakeyWakey/issues">Report a problem</a></span>
+  </footer>
+</div>
+
+<script>
+  // Demo: click the eye to toggle awake / drowsy.
+  (function () {
+    var btn = document.getElementById('eyeBtn');
+    var eye = document.getElementById('eye');
+    var state = document.getElementById('eyeState');
+    var awake = false;
+    btn.addEventListener('click', function () {
+      awake = !awake;
+      eye.classList.toggle('awake', awake);
+      eye.classList.toggle('drowsy', !awake);
+      btn.setAttribute('aria-pressed', String(awake));
+      state.innerHTML = awake
+        ? 'Wide awake. <b>Click again to let it sleep.</b>'
+        : 'Getting sleepy. <b>Click the eye.</b>';
+    });
+  })();
+
+  // Download button: point at the latest .dmg if the GitHub API is reachable.
+  (function () {
+    var repo = 'amcode/WakeyWakey';
+    var btn = document.getElementById('download');
+    var meta = document.getElementById('meta');
+    fetch('https://api.github.com/repos/' + repo + '/releases/latest')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (rel) {
+        if (!rel || !rel.assets) return;
+        var dmg = rel.assets.find(function (a) { return /\.dmg$/i.test(a.name); });
+        if (dmg) btn.href = dmg.browser_download_url;
+        meta.textContent = 'Version ' + rel.tag_name.replace(/^v/, '') + ' · macOS 13 or later · free and open source';
+      })
+      .catch(function () {});
+  })();
+</script>
+</body>
+</html>
